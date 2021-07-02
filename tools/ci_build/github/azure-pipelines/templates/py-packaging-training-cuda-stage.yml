@@ -52,24 +52,24 @@ stages:
             CudaVersion: ${{ parameters.cuda_version }}
             DockerFile: ${{ parameters.docker_file }}
             GccVersion: ${{ parameters.gcc_version }}
-          Python37:
-            PythonVersion: '3.7'
-            TorchVersion: ${{ parameters.torch_version }}
-            CudaVersion: ${{ parameters.cuda_version }}
-            DockerFile: ${{ parameters.docker_file }}
-            GccVersion: ${{ parameters.gcc_version }}
-          Python38:
-            PythonVersion: '3.8'
-            TorchVersion: ${{ parameters.torch_version }}
-            CudaVersion: ${{ parameters.cuda_version }}
-            DockerFile: ${{ parameters.docker_file }}
-            GccVersion: ${{ parameters.gcc_version }}
-          Python39:
-            PythonVersion: '3.9'
-            TorchVersion: ${{ parameters.torch_version }}
-            CudaVersion: ${{ parameters.cuda_version }}
-            DockerFile: ${{ parameters.docker_file }}
-            GccVersion: ${{ parameters.gcc_version }}
+#          Python37:
+#            PythonVersion: '3.7'
+#            TorchVersion: ${{ parameters.torch_version }}
+#            CudaVersion: ${{ parameters.cuda_version }}
+#            DockerFile: ${{ parameters.docker_file }}
+#            GccVersion: ${{ parameters.gcc_version }}
+#          Python38:
+#            PythonVersion: '3.8'
+#            TorchVersion: ${{ parameters.torch_version }}
+#            CudaVersion: ${{ parameters.cuda_version }}
+#            DockerFile: ${{ parameters.docker_file }}
+#            GccVersion: ${{ parameters.gcc_version }}
+#          Python39:
+#            PythonVersion: '3.9'
+#            TorchVersion: ${{ parameters.torch_version }}
+#            CudaVersion: ${{ parameters.cuda_version }}
+#            DockerFile: ${{ parameters.docker_file }}
+#            GccVersion: ${{ parameters.gcc_version }}
       steps:
       - checkout: self
         clean: true
@@ -132,25 +132,25 @@ stages:
                   --use_cuda --cuda_version=$(CudaVersion) --cuda_home=/usr/local/cuda-$(CudaVersion) --cudnn_home=/usr/local/cuda-$(CudaVersion) ;
           workingDirectory: $(Build.SourcesDirectory)
 
-      - task: CmdLine@2
-        displayName: 'test ortmodule'
-        inputs:
-          script: |
-            rm -rf $(Build.BinariesDirectory)/Release/onnxruntime/ && \
-            files=($(Build.BinariesDirectory)/Release/dist/*.whl) && \
-            echo ${files[0]} && \
-            whlfilename=$(basename ${files[0]}) && \
-            echo $whlfilename && \
-            docker run --rm \
-              --gpus all \
-              -e NVIDIA_VISIBLE_DEVICES=all \
-              --volume $(Build.BinariesDirectory):/build \
-              --volume /mnist:/mnist \
-              --volume /bert_data:/bert_data \
-              --volume /hf_models_cache:/hf_models_cache \
-              onnxruntimetraininggpubuild \
-                bash -c " $(PythonManylinuxDir)/bin/python3 -m pip install /build/Release/dist/$whlfilename && $(PythonManylinuxDir)/bin/python3 -m onnxruntime.training.ortmodule.torch_cpp_extensions.install && $(PythonManylinuxDir)/bin/python3 /build/Release/launch_test.py --cmd_line_with_args 'python orttraining_ortmodule_tests.py --mnist /mnist --bert_data /bert_data/hf_data/glue_data/CoLA/original/raw --transformers_cache /hf_models_cache/huggingface/transformers' --cwd /build/Release " ;
-          workingDirectory: $(Build.SourcesDirectory)
+#      - task: CmdLine@2
+#        displayName: 'test ortmodule'
+#        inputs:
+#          script: |
+#            rm -rf $(Build.BinariesDirectory)/Release/onnxruntime/ && \
+#            files=($(Build.BinariesDirectory)/Release/dist/*.whl) && \
+#            echo ${files[0]} && \
+#            whlfilename=$(basename ${files[0]}) && \
+#            echo $whlfilename && \
+#            docker run --rm \
+#              --gpus all \
+#              -e NVIDIA_VISIBLE_DEVICES=all \
+#              --volume $(Build.BinariesDirectory):/build \
+#              --volume /mnist:/mnist \
+#              --volume /bert_data:/bert_data \
+#              --volume /hf_models_cache:/hf_models_cache \
+#              onnxruntimetraininggpubuild \
+#                bash -c " $(PythonManylinuxDir)/bin/python3 -m pip install /build/Release/dist/$whlfilename && $(PythonManylinuxDir)/bin/python3 -m onnxruntime.training.ortmodule.torch_cpp_extensions.install && $(PythonManylinuxDir)/bin/python3 /build/Release/launch_test.py --cmd_line_with_args 'python orttraining_ortmodule_tests.py --mnist /mnist --bert_data /bert_data/hf_data/glue_data/CoLA/original/raw --transformers_cache /hf_models_cache/huggingface/transformers' --cwd /build/Release " ;
+#          workingDirectory: $(Build.SourcesDirectory)
 
       - task: CopyFiles@2
         displayName: 'Copy Python Wheel to: $(Build.ArtifactStagingDirectory)'
@@ -192,22 +192,22 @@ stages:
         inputs:
           ArtifactName: onnxruntime_gpu
 
-      - task: AzureCLI@2
-        inputs:
-          azureSubscription: 'AIInfraBuildOnnxRuntimeOSS'
-          scriptType: 'bash'
-          scriptLocation: 'inlineScript'
-          inlineScript: |
-            python3 -m pip install azure-storage-blob==2.1.0
-            files=($(Build.ArtifactStagingDirectory)/Release/dist/*.whl) && \
-            echo ${files[0]} && \
-            python3 tools/ci_build/upload_python_package_to_azure_storage.py \
-                --python_wheel_path ${files[0]} \
-                --account_name onnxruntimepackages \
-                --account_key $(orttrainingpackagestorageaccountkey) \
-                --container_name '$web'
-          condition: succeededOrFailed()
-          displayName: 
+#      - task: AzureCLI@2
+#        inputs:
+#          azureSubscription: 'AIInfraBuildOnnxRuntimeOSS'
+#          scriptType: 'bash'
+#          scriptLocation: 'inlineScript'
+#          inlineScript: |
+#            python3 -m pip install azure-storage-blob==2.1.0
+#            files=($(Build.ArtifactStagingDirectory)/Release/dist/*.whl) && \
+#            echo ${files[0]} && \
+#            python3 tools/ci_build/upload_python_package_to_azure_storage.py \
+#                --python_wheel_path ${files[0]} \
+#                --account_name onnxruntimepackages \
+#                --account_key $(orttrainingpackagestorageaccountkey) \
+#                --container_name '$web'
+#          condition: succeededOrFailed()
+#          displayName: 
 
       - template: component-governance-component-detection-steps.yml
         parameters:
